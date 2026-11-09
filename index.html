@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Инвест-ноутбук — концепт</title>
+<meta name="description" content="Концепт AI-ассистента инвестора: коннекторы к источникам, недельная сводка в удобном формате и идеи под риск-профиль.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#E9EBEE; --frame:#D5D8DD; --phone:#F6F7F8; --card:#FFFFFF; --s2:#F1F2F4; --line:#E6E7EA;
+  --text:#1A1A1A; --muted:#62666E; --soft:#3A3D42;
+  --accent:#FFDD2D; --accent-ink:#1A1A1A; --link:#2E66E0;
+  --up:#13834A; --down:#C93038; --tab:#FFFFFF; --scrim:rgba(0,0,0,.4); --shadow:0 30px 70px -25px rgba(20,25,35,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--text);font-family:Onest,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* page */
+.page{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:72px;padding:48px 24px;flex-wrap:wrap}
+.pitch{max-width:440px;display:flex;flex-direction:column;gap:22px}
+.badge{align-self:flex-start;background:var(--accent);color:var(--accent-ink);font-size:13px;font-weight:700;border-radius:10px;padding:6px 10px}
+.pitch h1{margin:0;font-size:46px;line-height:1.04;letter-spacing:-.03em;font-weight:800}
+.pitch p{margin:0;font-size:17px;line-height:1.55;color:var(--soft)}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.steps li{display:flex;gap:14px;align-items:flex-start}
+.steps .n{flex:none;width:28px;height:28px;border-radius:9px;background:var(--card);border:1px solid var(--line);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.steps b{display:block;font-size:15px;margin-bottom:2px}
+.steps span{font-size:14px;color:var(--muted);line-height:1.45}
+.note{font-size:12px;line-height:1.5;color:var(--muted)}
+
+/* device */
+.device{width:410px;height:864px;padding:10px;border-radius:58px;background:var(--frame);box-shadow:var(--shadow);flex:none}
+.phone{position:relative;width:390px;height:844px;border-radius:48px;background:var(--phone);overflow:hidden;overflow:clip;display:flex;flex-direction:column}
+.phone::before{content:"";position:absolute;top:0;left:0;right:0;height:54px;background:linear-gradient(var(--phone) 70%,transparent);z-index:4;pointer-events:none}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:34px;border-radius:20px;background:#000;z-index:5}
+.screen{flex:1;overflow-y:auto;padding:58px 16px 24px;display:none;flex-direction:column;gap:16px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{display:flex}
+.screen > *{flex-shrink:0}
+@media (max-width:460px){
+  .page{padding:0;gap:0}
+  .pitch{display:none}
+  .device{width:100vw;height:100dvh;padding:0;border-radius:0;box-shadow:none;background:var(--phone)}
+  .phone{width:100%;height:100%;border-radius:0}
+  .island{display:none}
+}
+
+/* shared */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 4px}
+.top h2{margin:0;font-size:30px;font-weight:800;letter-spacing:-.02em}
+.top small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.round{width:40px;height:40px;border-radius:20px;border:0;background:var(--card);display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.avatar{background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:15px}
+.card{background:var(--card);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card h3,.h3{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em}
+.sub{font-size:13px;color:var(--muted);line-height:1.45}
+.row-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.link{border:0;background:none;color:var(--link);font-size:14px;font-weight:600;padding:0}
+.btn{height:44px;border-radius:14px;border:0;padding:0 16px;font-size:15px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.y{background:var(--accent);color:var(--accent-ink)}
+.btn.g{background:var(--s2)}
+.btn.wide{width:100%}
+.btns{display:flex;gap:8px}
+.btns .btn{flex:1}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{height:36px;padding:0 14px;border-radius:12px;border:0;background:var(--card);font-size:14px;font-weight:600;color:var(--soft)}
+.chip[aria-pressed="true"]{background:var(--text);color:var(--phone)}
+.demo{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);background:var(--s2);border-radius:6px;padding:2px 6px;vertical-align:2px}
+.up{color:var(--up)} .down{color:var(--down)}
+.tick{width:40px;height:40px;flex:none;border-radius:20px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.02em}
+.list{display:flex;flex-direction:column}
+.item{display:flex;align-items:center;gap:12px;padding:10px 0;border:0;background:none;width:100%;text-align:left}
+.item + .item{border-top:1px solid var(--line)}
+.item .b{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.item .t{font-size:15px;font-weight:600}
+.item .s{font-size:13px;color:var(--muted);line-height:1.4}
+.item .r{font-size:15px;font-weight:600;text-align:right}
+
+/* stories */
+.stories{display:flex;gap:12px;overflow-x:auto;padding:2px 4px;scrollbar-width:none}
+.stories::-webkit-scrollbar{display:none}
+.story{flex:none;width:76px;display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;padding:0}
+.story .ring{width:72px;height:72px;border-radius:22px;padding:3px;background:var(--accent)}
+.story .in{width:100%;height:100%;border-radius:19px;border:3px solid var(--phone);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;text-align:center;line-height:1.15;padding:4px}
+.story.seen .ring{background:var(--line)}
+.story span{font-size:11px;font-weight:500;color:var(--soft);text-align:center;line-height:1.25}
+
+/* portfolio */
+.big{font-size:30px;font-weight:800;letter-spacing:-.02em}
+
+/* digest */
+.seg{display:flex;gap:4px;background:var(--card);border-radius:14px;padding:4px;overflow-x:auto;scrollbar-width:none}
+.seg button{flex:1;min-width:max-content;height:36px;border:0;border-radius:10px;background:transparent;font-size:13px;font-weight:600;color:var(--muted);padding:0 10px}
+.seg button[aria-pressed="true"]{background:var(--text);color:var(--phone)}
+.player{display:flex;align-items:center;gap:12px;background:var(--s2);border-radius:16px;padding:10px 12px}
+.play{width:44px;height:44px;border-radius:22px;border:0;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;flex:none}
+.track{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.track b{font-size:14px}
+.bar{height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--text);transition:width .3s linear}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{background:var(--s2);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:4px}
+.tile span{font-size:11px;color:var(--muted);font-weight:500}
+.tile b{font-size:16px}
+.topic{display:flex;flex-direction:column;gap:8px;padding:12px 0}
+.topic + .topic{border-top:1px solid var(--line)}
+.topic b{font-size:15px}
+.topic p{margin:0;font-size:14px;line-height:1.5;color:var(--soft)}
+.stance{display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px}
+.stance i:first-child{background:var(--up)} .stance i:last-child{background:var(--down)}
+.stance-l{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.srcs{display:flex;flex-wrap:wrap;gap:6px}
+.src{font-size:12px;font-weight:600;background:var(--s2);border-radius:8px;padding:4px 8px;color:var(--soft)}
+.cal .item .t{font-size:14px}
+.day{width:40px;flex:none;font-size:13px;font-weight:700;color:var(--muted)}
+
+/* ideas */
+.profile{display:flex;align-items:center;gap:12px;background:var(--accent);color:var(--accent-ink);border-radius:20px;padding:14px 16px}
+.profile .b{flex:1}
+.profile b{display:block;font-size:15px}
+.profile span{font-size:13px}
+.profile button{border:0;background:rgba(0,0,0,.08);border-radius:10px;height:36px;padding:0 12px;font-weight:600;font-size:13px;color:var(--accent-ink)}
+.idea{background:var(--card);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.idea-h{display:flex;align-items:center;gap:12px}
+.idea-h .b{flex:1;min-width:0}
+.idea-h b{display:block;font-size:16px}
+.act{font-size:12px;font-weight:700;border-radius:8px;padding:4px 8px}
+.act.buy{background:rgba(19,131,74,.12);color:var(--up)}
+.act.cut{background:rgba(201,48,56,.12);color:var(--down)}
+.act.bond{background:rgba(46,102,224,.12);color:var(--link)}
+.why{margin:0;font-size:14px;line-height:1.5;color:var(--soft)}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fact{background:var(--s2);border-radius:12px;padding:8px 10px}
+.fact span{display:block;font-size:11px;color:var(--muted)}
+.fact b{font-size:14px}
+.ok{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--up)}
+
+/* sources */
+.src-ic{width:40px;height:40px;flex:none;border-radius:12px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--soft)}
+.plat{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.plat em{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);background:var(--s2);border-radius:6px;padding:2px 6px}
+.add{height:34px;padding:0 12px;border-radius:10px;border:0;background:var(--accent);color:var(--accent-ink);font-size:13px;font-weight:700;flex:none}
+.add[aria-pressed="true"]{background:var(--s2);color:var(--muted)}
+.switch{position:relative;width:48px;height:28px;border-radius:14px;border:0;background:var(--line);flex:none;padding:0;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--up)}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+
+/* chat */
+.msgs{display:flex;flex-direction:column;gap:10px;flex:1}
+.msg{max-width:88%;padding:12px 14px;border-radius:20px;font-size:14px;line-height:1.5}
+.msg.me{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:6px;font-weight:500}
+.msg.ai{align-self:flex-start;background:var(--card);border-bottom-left-radius:6px;color:var(--soft)}
+.cite{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:6px;background:var(--s2);color:var(--link);font-size:11px;font-weight:800;vertical-align:1px}
+.refs{display:flex;flex-direction:column;gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.composer{position:sticky;bottom:0;display:flex;gap:8px;align-items:center;background:var(--card);border-radius:18px;padding:6px 6px 6px 14px;box-shadow:0 0 0 1px var(--line)}
+.composer input{flex:1;min-width:0;height:44px;border:0;background:transparent;font-size:15px}
+.composer input::placeholder{color:var(--muted)}
+.composer input:focus{outline:none}
+.send{width:44px;height:44px;border-radius:14px;border:0;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;flex:none}
+
+/* tab bar */
+.tabs{flex:none;height:84px;padding:8px 6px 24px;background:var(--tab);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.tab{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:500;color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--text);font-weight:700}
+
+/* sheet, toast */
+.scrim{position:absolute;inset:0;background:var(--scrim);display:none;z-index:10}
+.scrim.on{display:block}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow-y:auto;background:var(--phone);border-top-left-radius:28px;border-top-right-radius:28px;padding:10px 16px 32px;display:flex;flex-direction:column;gap:14px;transform:translateY(105%);visibility:hidden;transition:transform .25s ease,visibility 0s .25s;z-index:11}
+.sheet.on{transform:none;visibility:visible;transition:transform .25s ease}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);align-self:center;flex:none}
+.sheet h4{margin:0;font-size:22px;font-weight:800}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:11px 0;border-bottom:1px solid var(--line)}
+.kv span{color:var(--muted)}
+.toast{position:absolute;left:16px;right:16px;bottom:100px;background:var(--text);color:var(--phone);border-radius:16px;padding:14px 16px;font-size:14px;font-weight:600;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;z-index:12}
+.toast.on{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-digest" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></g></symbol>
+    <symbol id="i-idea" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></g></symbol>
+    <symbol id="i-src" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="12" r="2"/><path d="M8 7l8 4"/><path d="M8 17l8-4"/></g></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5h14v10H10l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><g fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></g></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></g></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></g></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="page">
+
+  <section class="pitch" aria-labelledby="pitch-title">
+    <span class="badge">Концепт для AI-челленджа</span>
+    <h1 id="pitch-title">Инвест-ноутбук</h1>
+    <p>Раздел брокерского приложения, где инвестор подключает источники, которым доверяет, — от YouTube и Rutube до Telegram, VK и PDF, — и получает по ним недельную сводку и идеи под свой риск-профиль.</p>
+    <ol class="steps">
+      <li><span class="n">1</span><div><b>Источники</b><span>Базовые новости и раскрытия плюс популярные каналы и свои файлы.</span></div></li>
+      <li><span class="n">2</span><div><b>Сводка недели</b><span>Рынок, портфель и темы из ваших источников — текстом, подкастом, PDF, слайдами или постом.</span></div></li>
+      <li><span class="n">3</span><div><b>Идеи</b><span>Предложения под риск-профиль с объяснением и источниками; заявка — только после подтверждения.</span></div></li>
+      <li><span class="n">4</span><div><b>Чат</b><span>Вопросы по портфелю и рынку с ответами со ссылками на источники.</span></div></li>
+    </ol>
+    <p class="note">Макет интерактивный — переключайте вкладки внизу экрана. Концепт не является продуктом или разработкой какой-либо компании. Названия каналов приведены как примеры подключаемых источников; содержание выпусков, цифры и идеи условные и не являются инвестиционной рекомендацией.</p>
+  </section>
+
+  <div class="device">
+  <div class="phone">
+    <div class="island" aria-hidden="true"></div>
+
+    <!-- ================= HOME ================= -->
+    <main class="screen active" id="s-home" aria-label="Главная">
+      <div class="top">
+        <button class="round avatar" id="openProfile" aria-label="Профиль и настройки">А</button>
+        <h2 class="sr">Главная</h2>
+        <button class="round" aria-label="Поиск"><svg width="20" height="20" aria-hidden="true"><use href="#i-search"/></svg></button>
+      </div>
+
+      <div class="stories" role="list" aria-label="Истории">
+        <button class="story" role="listitem" data-go="digest"><span class="ring"><span class="in">Итоги недели</span></span><span>Сводка 3–9 ноя</span></button>
+        <button class="story" role="listitem" data-go="ideas"><span class="ring"><span class="in">3 идеи</span></span><span>Под ваш профиль</span></button>
+        <button class="story" role="listitem" data-go="digest" data-play><span class="ring"><span class="in">7 мин</span></span><span>Подкаст недели</span></button>
+        <button class="story seen" role="listitem" data-go="src"><span class="ring"><span class="in">+2</span></span><span>Новые источники</span></button>
+      </div>
+
+      <section class="card" aria-label="Портфель">
+        <div class="row-h"><span class="sub">Брокерский счёт <span class="demo">демо</span></span><button class="link" data-toast="Откроется портфель в приложении">Портфель</button></div>
+        <div class="big">1 248 300 ₽</div>
+        <div class="sub"><span class="up">+18 420 ₽ · 1,5%</span> за неделю</div>
+      </section>
+
+      <section class="card" aria-label="Сводка недели">
+        <div class="row-h"><h3>Сводка за неделю</h3><span class="sub">46 материалов</span></div>
+        <div class="list">
+          <div class="item"><span class="tick">РЫН</span><span class="b"><span class="t">Рынок ждёт решения по ставке</span><span class="s">7 источников обсуждали тему</span></span></div>
+          <div class="item"><span class="tick">SBER</span><span class="b"><span class="t">Споры о размере дивидендов</span><span class="s">Мнения разделились: 3 за, 2 против</span></span></div>
+          <div class="item"><span class="tick">YDEX</span><span class="b"><span class="t">Разборы квартальной отчётности</span><span class="s">2 видео и 1 PDF</span></span></div>
+        </div>
+        <div class="btns">
+          <button class="btn y" data-go="digest">Читать</button>
+          <button class="btn g" data-go="digest" data-play><svg width="16" height="16" aria-hidden="true"><use href="#i-play"/></svg>Слушать</button>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Идеи">
+        <div class="row-h"><h3>Идеи для вас</h3><button class="link" data-go="ideas">Все 3</button></div>
+        <div class="list">
+          <button class="item" data-go="ideas"><span class="tick">LKOH</span><span class="b"><span class="t">Увеличить долю до 8%</span><span class="s">Подходит умеренному профилю</span></span><span class="act buy">Купить</span></button>
+          <button class="item" data-go="ideas"><span class="tick">SBER</span><span class="b"><span class="t">Доля выше лимита профиля</span><span class="s">12% при лимите 10%</span></span><span class="act cut">Сократить</span></button>
+        </div>
+      </section>
+    </main>
+
+    <!-- ================= DIGEST ================= -->
+    <main class="screen" id="s-digest" aria-label="Сводка">
+      <div class="top"><div><h2>Сводка недели</h2><small>3–9 ноября · 46 материалов из 11 источников</small></div></div>
+
+      <div class="seg" role="group" aria-label="Формат сводки" id="fmtSeg">
+        <button aria-pressed="true">Текст</button>
+        <button aria-pressed="false" data-toast="Подкаст включён — плеер ниже">Подкаст</button>
+        <button aria-pressed="false" data-toast="PDF готов к скачиванию">PDF</button>
+        <button aria-pressed="false" data-toast="Презентация на 8 слайдов готова">Слайды</button>
+        <button aria-pressed="false" data-toast="Пост скопирован — можно опубликовать в Пульсе">Пост</button>
+      </div>
+
+      <div class="player">
+        <button class="play" id="playBtn" aria-label="Слушать подкаст"><svg width="20" height="20" aria-hidden="true"><use href="#i-play" id="playIcon"/></svg></button>
+        <div class="track"><b>Подкаст недели · 7 мин</b><div class="bar"><i id="barFill"></i></div></div>
+      </div>
+
+      <section class="card" aria-label="Рынок за неделю">
+        <div class="row-h"><h3>Рынок за неделю</h3><span class="demo">демо-цифры</span></div>
+        <div class="tiles">
+          <div class="tile"><span>Индекс МосБиржи</span><b class="up">+1,2%</b></div>
+          <div class="tile"><span>ОФЗ, индекс</span><b class="up">+0,4%</b></div>
+          <div class="tile"><span>USD/RUB</span><b class="down">−0,8%</b></div>
+        </div>
+        <p class="why">Главная тема недели в ваших источниках — ожидания по ключевой ставке. Большинство авторов связывают рост индекса с надеждами на смягчение политики, часть предупреждает о рисках инфляции.</p>
+      </section>
+
+      <section class="card" aria-label="Ваш портфель">
+        <div class="row-h"><h3>Ваш портфель</h3><span class="sub up">+1,5%</span></div>
+        <div class="list">
+          <div class="item"><span class="tick">SBER</span><span class="b"><span class="t">Сбербанк</span><span class="s">Доля 12% · выше лимита профиля</span></span><span class="r up">+3,1%</span></div>
+          <div class="item"><span class="tick">LKOH</span><span class="b"><span class="t">Лукойл</span><span class="s">Доля 5%</span></span><span class="r up">+1,4%</span></div>
+          <div class="item"><span class="tick">YDEX</span><span class="b"><span class="t">Яндекс</span><span class="s">Доля 9%</span></span><span class="r down">−2,4%</span></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Темы из ваших источников">
+        <div class="row-h"><h3>Темы из ваших источников</h3></div>
+        <div class="topic">
+          <b>Ключевая ставка</b>
+          <p>Авторы обсуждают, будет ли снижение на ближайшем заседании и как это отразится на облигациях и банках.</p>
+          <div class="stance" aria-hidden="true"><i style="flex:5"></i><i style="flex:2"></i></div>
+          <div class="stance-l"><span>5 ждут снижения</span><span>2 ждут паузы</span></div>
+          <div class="srcs"><span class="src">InvestFuture</span><span class="src">Деньги не спят</span><span class="src">MarketTwits</span><span class="src">+4</span></div>
+        </div>
+        <div class="topic">
+          <b>Дивиденды SBER</b>
+          <p>Обсуждают, сохранится ли размер выплаты: одни ссылаются на прибыль, другие — на рост резервов.</p>
+          <div class="stance" aria-hidden="true"><i style="flex:3"></i><i style="flex:2"></i></div>
+          <div class="stance-l"><span>3 ждут не ниже прошлого года</span><span>2 — снижения</span></div>
+          <div class="srcs"><span class="src">Сигналы РЦБ</span><span class="src">Смартлаб</span><span class="src">Стратегия 2027.pdf</span><span class="src">+2</span></div>
+        </div>
+        <div class="topic">
+          <b>Отчётность YDEX</b>
+          <p>В видео-разборах обсуждают темпы роста выручки и расходы на развитие.</p>
+          <div class="srcs"><span class="src">InvestFuture · видео</span><span class="src">Деньги не спят · видео</span></div>
+        </div>
+        <button class="btn g wide" data-go="chat">Спросить про сводку</button>
+      </section>
+
+      <section class="card cal" aria-label="На следующей неделе">
+        <div class="row-h"><h3>На следующей неделе</h3><span class="demo">демо</span></div>
+        <div class="list">
+          <div class="item"><span class="day">Пн</span><span class="b"><span class="t">Отчётность эмитента из портфеля</span></span></div>
+          <div class="item"><span class="day">Ср</span><span class="b"><span class="t">Данные по инфляции</span></span></div>
+          <div class="item"><span class="day">Пт</span><span class="b"><span class="t">Решение по ключевой ставке</span></span></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ================= IDEAS ================= -->
+    <main class="screen" id="s-ideas" aria-label="Идеи">
+      <div class="top"><div><h2>Идеи</h2><small>По вашим источникам и портфелю</small></div></div>
+
+      <div class="profile">
+        <div class="b"><b>Умеренный профиль</b><span>до 10% на бумагу · без маржинальных сделок</span></div>
+        <button id="openProfile2">Изменить</button>
+      </div>
+
+      <div class="chips" data-single role="group" aria-label="Фильтр идей">
+        <button class="chip" aria-pressed="true">Все</button>
+        <button class="chip" aria-pressed="false">Купить</button>
+        <button class="chip" aria-pressed="false">Сократить</button>
+        <button class="chip" aria-pressed="false">Облигации</button>
+      </div>
+
+      <article class="idea">
+        <div class="idea-h"><span class="tick">LKOH</span><div class="b"><b>Увеличить долю до 8%</b><span class="sub">Лукойл</span></div><span class="act buy">Купить</span></div>
+        <p class="why">4 из 6 ваших источников за неделю обсуждали дивидендную историю компании. Доля в портфеле сейчас ниже, чем у других бумаг сектора.</p>
+        <div class="facts">
+          <div class="fact"><span>Доля сейчас → после</span><b>5% → 8%</b></div>
+          <div class="fact"><span>Ориентир суммы</span><b>[сумма] ₽</b></div>
+        </div>
+        <span class="ok"><svg width="16" height="16" aria-hidden="true"><use href="#i-check"/></svg>В рамках риск-профиля</span>
+        <div class="srcs"><span class="src">Сигналы РЦБ</span><span class="src">InvestFuture</span><span class="src">+2</span></div>
+        <div class="btns"><button class="btn y" data-idea="LKOH">Подробнее</button><button class="btn g" data-toast="Идея скрыта — учтём в следующих сводках">Не интересно</button></div>
+      </article>
+
+      <article class="idea">
+        <div class="idea-h"><span class="tick">SBER</span><div class="b"><b>Снизить долю до 10%</b><span class="sub">Сбербанк</span></div><span class="act cut">Сократить</span></div>
+        <p class="why">После роста за неделю доля бумаги 12% — выше лимита вашего профиля. Мнения источников по дивидендам расходятся.</p>
+        <div class="facts">
+          <div class="fact"><span>Доля сейчас → после</span><b>12% → 10%</b></div>
+          <div class="fact"><span>Причина</span><b>Лимит профиля</b></div>
+        </div>
+        <span class="ok"><svg width="16" height="16" aria-hidden="true"><use href="#i-check"/></svg>Возвращает портфель в рамки профиля</span>
+        <div class="btns"><button class="btn y" data-idea="SBER">Подробнее</button><button class="btn g" data-toast="Идея скрыта — учтём в следующих сводках">Не интересно</button></div>
+      </article>
+
+      <article class="idea">
+        <div class="idea-h"><span class="tick">ОФЗ</span><div class="b"><b>Добавить длинные ОФЗ</b><span class="sub">Облигации</span></div><span class="act bond">Облигации</span></div>
+        <p class="why">5 из 7 источников ждут снижения ставки. Облигации добавят портфелю устойчивости — сейчас их доля 0%.</p>
+        <div class="facts">
+          <div class="fact"><span>Доля сейчас → после</span><b>0% → 10%</b></div>
+          <div class="fact"><span>Риск</span><b>Низкий</b></div>
+        </div>
+        <span class="ok"><svg width="16" height="16" aria-hidden="true"><use href="#i-check"/></svg>В рамках риск-профиля</span>
+        <div class="srcs"><span class="src">Деньги не спят</span><span class="src">MarketTwits</span><span class="src">+3</span></div>
+        <div class="btns"><button class="btn y" data-idea="ОФЗ">Подробнее</button><button class="btn g" data-toast="Идея скрыта — учтём в следующих сводках">Не интересно</button></div>
+      </article>
+
+      <p class="sub" style="padding:0 4px">Идеи — обзор мнений из выбранных вами источников с учётом портфеля и профиля, а не гарантия результата. Сделка — только после вашего подтверждения.</p>
+    </main>
+
+    <!-- ================= SOURCES ================= -->
+    <main class="screen" id="s-src" aria-label="Источники">
+      <div class="top"><div><h2>Источники</h2><small>11 подключено</small></div><button class="round" id="openAdd" aria-label="Добавить источник"><svg width="20" height="20" aria-hidden="true"><use href="#i-plus"/></svg></button></div>
+
+      <section class="card" aria-label="Популярные каналы">
+        <div class="row-h"><h3>Популярные каналы</h3></div>
+        <div class="list">
+          <div class="item"><span class="src-ic">IF</span><span class="b"><span class="t">InvestFuture</span><span class="plat"><em>YouTube</em><em>Rutube</em><em>VK</em></span></span><button class="add" aria-pressed="true">Добавлен</button></div>
+          <div class="item"><span class="src-ic">ДНС</span><span class="b"><span class="t">Деньги не спят</span><span class="plat"><em>YouTube</em><em>Rutube</em></span></span><button class="add" aria-pressed="true">Добавлен</button></div>
+          <div class="item"><span class="src-ic">MT</span><span class="b"><span class="t">MarketTwits</span><span class="plat"><em>Telegram</em></span></span><button class="add" aria-pressed="true">Добавлен</button></div>
+          <div class="item"><span class="src-ic">РЦБ</span><span class="b"><span class="t">Сигналы РЦБ</span><span class="plat"><em>Telegram</em></span></span><button class="add" aria-pressed="true">Добавлен</button></div>
+          <div class="item"><span class="src-ic">SL</span><span class="b"><span class="t">Смартлаб</span><span class="plat"><em>Telegram</em><em>Сайт</em></span></span><button class="add" aria-pressed="false">Добавить</button></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Базовые источники">
+        <div class="row-h"><h3>Базовые</h3><span class="sub">включены по умолчанию</span></div>
+        <div class="list">
+          <div class="item"><span class="src-ic">Н</span><span class="b"><span class="t">Новости рынка</span><span class="s">Ленты новостей · каждые 15 мин</span></span><button class="switch" role="switch" aria-checked="true" aria-label="Новости рынка"></button></div>
+          <div class="item"><span class="src-ic">Р</span><span class="b"><span class="t">Раскрытия эмитентов</span><span class="s">Существенные факты, отчётность</span></span><button class="switch" role="switch" aria-checked="true" aria-label="Раскрытия эмитентов"></button></div>
+          <div class="item"><span class="src-ic">П</span><span class="b"><span class="t">Пульс</span><span class="s">Посты по бумагам портфеля</span></span><button class="switch" role="switch" aria-checked="true" aria-label="Пульс"></button></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Мои источники">
+        <div class="row-h"><h3>Мои</h3></div>
+        <div class="list">
+          <div class="item"><span class="src-ic">PDF</span><span class="b"><span class="t">Стратегия 2027.pdf</span><span class="s">Загружен вами · 42 страницы</span></span><button class="switch" role="switch" aria-checked="true" aria-label="Стратегия 2027.pdf"></button></div>
+          <div class="item"><span class="src-ic">VK</span><span class="b"><span class="t">Сообщество в VK</span><span class="s">Добавлено по ссылке</span></span><button class="switch" role="switch" aria-checked="true" aria-label="Сообщество в VK"></button></div>
+        </div>
+        <button class="btn g wide" id="openAdd2"><svg width="18" height="18" aria-hidden="true"><use href="#i-plus"/></svg>Ссылка, файл, аудио или видео</button>
+      </section>
+    </main>
+
+    <!-- ================= CHAT ================= -->
+    <main class="screen" id="s-chat" aria-label="Чат">
+      <div class="top"><div><h2>Чат</h2><small>Отвечает по вашим источникам</small></div></div>
+      <div class="msgs" id="msgs" aria-live="polite">
+        <div class="msg me">Почему ты предлагаешь сократить SBER?</div>
+        <div class="msg ai">
+          Доля бумаги после роста — 12%, а лимит вашего умеренного профиля — 10% на одну бумагу. По дивидендам мнения расходятся: в вашем PDF прогноз выплаты сохранён <span class="cite">1</span>, а 2 из 5 источников ждут снижения из-за резервов <span class="cite">2</span>. Решение за вами.
+          <div class="refs"><div>1 · Стратегия 2027.pdf, с. 14</div><div>2 · Сводка недели, тема «Дивиденды SBER»</div></div>
+        </div>
+      </div>
+      <div class="chips" id="suggest">
+        <button class="chip">Что изменилось за неделю?</button>
+        <button class="chip">Сделай пост по итогам</button>
+      </div>
+      <form class="composer" id="composer">
+        <label for="ask" class="sr">Вопрос ассистенту</label>
+        <input id="ask" placeholder="Спросите о портфеле или рынке" autocomplete="off">
+        <button class="send" aria-label="Отправить"><svg width="20" height="20" aria-hidden="true"><use href="#i-up"/></svg></button>
+      </form>
+    </main>
+
+    <!-- ================= TABS ================= -->
+    <nav class="tabs" role="tablist" aria-label="Разделы">
+      <button class="tab" role="tab" aria-selected="true" data-tab="home"><svg width="24" height="24" aria-hidden="true"><use href="#i-home"/></svg>Главная</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="digest"><svg width="24" height="24" aria-hidden="true"><use href="#i-digest"/></svg>Сводка</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="ideas"><svg width="24" height="24" aria-hidden="true"><use href="#i-idea"/></svg>Идеи</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="src"><svg width="24" height="24" aria-hidden="true"><use href="#i-src"/></svg>Источники</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="chat"><svg width="24" height="24" aria-hidden="true"><use href="#i-chat"/></svg>Чат</button>
+    </nav>
+
+    <!-- ================= SHEETS ================= -->
+    <div class="scrim" id="scrim"></div>
+
+    <div class="sheet" id="ideaSheet" role="dialog" aria-modal="true" aria-labelledby="ideaTitle">
+      <span class="grab" aria-hidden="true"></span>
+      <h4 id="ideaTitle">Идея</h4>
+      <div id="ideaBody"></div>
+      <p class="sub" style="margin:0">Это обзор мнений из выбранных вами источников, а не гарантия результата.</p>
+      <button class="btn y wide" id="confirmIdea">Подготовить заявку</button>
+      <button class="btn g wide" data-close>Отмена</button>
+    </div>
+
+    <div class="sheet" id="addSheet" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+      <span class="grab" aria-hidden="true"></span>
+      <h4 id="addTitle">Добавить источник</h4>
+      <div class="card"><div class="list">
+        <button class="item" data-toast="Вставьте ссылку на канал YouTube, Rutube, Telegram или VK"><span class="src-ic">URL</span><span class="b"><span class="t">Ссылка на канал</span><span class="s">YouTube, Rutube, Telegram, VK, сайт</span></span></button>
+        <button class="item" data-toast="Выберите PDF-файл"><span class="src-ic">PDF</span><span class="b"><span class="t">Документ</span><span class="s">Отчёты, презентации, статьи</span></span></button>
+        <button class="item" data-toast="Выберите аудио или видео — расшифруем"><span class="src-ic">MP3</span><span class="b"><span class="t">Аудио или видео</span><span class="s">Подкасты и записи эфиров</span></span></button>
+      </div></div>
+      <button class="btn g wide" data-close>Закрыть</button>
+    </div>
+
+    <div class="sheet" id="profileSheet" role="dialog" aria-modal="true" aria-labelledby="profTitle">
+      <span class="grab" aria-hidden="true"></span>
+      <h4 id="profTitle">Персонализация</h4>
+      <div class="sub">Риск-профиль</div>
+      <div class="seg" role="group" aria-label="Риск-профиль">
+        <button aria-pressed="false">Консервативный</button>
+        <button aria-pressed="true">Умеренный</button>
+        <button aria-pressed="false">Агрессивный</button>
+      </div>
+      <div class="sub">Интересы</div>
+      <div class="chips">
+        <button class="chip" aria-pressed="true">Дивиденды</button>
+        <button class="chip" aria-pressed="true">Нефть и газ</button>
+        <button class="chip" aria-pressed="false">IT</button>
+        <button class="chip" aria-pressed="true">Облигации</button>
+      </div>
+      <div class="sub">Сводка недели</div>
+      <div class="chips" data-single>
+        <button class="chip" aria-pressed="true">Подкаст</button>
+        <button class="chip" aria-pressed="false">Текст</button>
+        <button class="chip" aria-pressed="false">PDF</button>
+        <button class="chip" aria-pressed="false">Пост</button>
+      </div>
+      <div class="card"><div class="list">
+        <div class="item"><span class="b"><span class="t">Сводка по воскресеньям</span><span class="s">В 19:00</span></span><button class="switch" role="switch" aria-checked="true" aria-label="Сводка по воскресеньям"></button></div>
+        <div class="item"><span class="b"><span class="t">Идеи сделок</span><span class="s">Только с подтверждением</span></span><button class="switch" role="switch" aria-checked="true" aria-label="Идеи сделок"></button></div>
+      </div></div>
+      <button class="btn y wide" data-close>Готово</button>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  // navigation
+  function go(name){
+    $$('.screen').forEach(function(s){ s.classList.toggle('active', s.id === 's-' + name); });
+    $$('.tab').forEach(function(t){ t.setAttribute('aria-selected', t.dataset.tab === name ? 'true' : 'false'); });
+    var scr = $('#s-' + name); if (scr) scr.scrollTop = 0;
+  }
+  $$('.tab').forEach(function(t){ t.addEventListener('click', function(){ go(t.dataset.tab); }); });
+  $$('[data-go]').forEach(function(b){ b.addEventListener('click', function(){
+    closeSheets(); go(b.dataset.go);
+    if (b.hasAttribute('data-play') && !playing) $('#playBtn').click();
+  }); });
+
+  // toast
+  var tt;
+  function toast(msg){ var t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(function(){ t.classList.remove('on'); }, 2300); }
+  $$('[data-toast]').forEach(function(b){ b.addEventListener('click', function(){ if (b.closest('.sheet')) closeSheets(); toast(b.dataset.toast); }); });
+
+  // toggles
+  $$('.switch').forEach(function(s){ s.addEventListener('click', function(){ s.setAttribute('aria-checked', s.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); }); });
+  $$('.add').forEach(function(b){ b.addEventListener('click', function(){
+    var on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'Добавлен' : 'Добавить';
+    if (on) toast('Источник подключён — материалы попадут в следующую сводку');
+  }); });
+  $$('.chips').forEach(function(g){
+    var single = g.hasAttribute('data-single');
+    $$('.chip[aria-pressed]', g).forEach(function(c){ c.addEventListener('click', function(){
+      if (single){ $$('.chip', g).forEach(function(x){ x.setAttribute('aria-pressed','false'); }); c.setAttribute('aria-pressed','true'); }
+      else c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    }); });
+  });
+  $$('.seg').forEach(function(g){
+    $$('button', g).forEach(function(b){ b.addEventListener('click', function(){
+      $$('button', g).forEach(function(x){ x.setAttribute('aria-pressed','false'); }); b.setAttribute('aria-pressed','true');
+    }); });
+  });
+
+  // podcast
+  var playing = false, pos = 0, timer;
+  $('#playBtn').addEventListener('click', function(){
+    playing = !playing;
+    $('#playIcon').setAttribute('href', playing ? '#i-pause' : '#i-play');
+    this.setAttribute('aria-label', playing ? 'Пауза' : 'Слушать подкаст');
+    clearInterval(timer);
+    if (playing) timer = setInterval(function(){
+      pos = Math.min(100, pos + 1); $('#barFill').style.width = pos + '%';
+      if (pos >= 100){ clearInterval(timer); playing = false; pos = 0; $('#playIcon').setAttribute('href', '#i-play'); }
+    }, 300);
+  });
+
+  // sheets
+  function openSheet(id){ $('#scrim').classList.add('on'); $(id).classList.add('on'); }
+  function closeSheets(){ $('#scrim').classList.remove('on'); $$('.sheet').forEach(function(s){ s.classList.remove('on'); }); }
+  $('#openAdd').addEventListener('click', function(){ openSheet('#addSheet'); });
+  $('#openAdd2').addEventListener('click', function(){ openSheet('#addSheet'); });
+  $('#openProfile').addEventListener('click', function(){ openSheet('#profileSheet'); });
+  $('#openProfile2').addEventListener('click', function(){ openSheet('#profileSheet'); });
+  $('#scrim').addEventListener('click', closeSheets);
+  $$('[data-close]').forEach(function(b){ b.addEventListener('click', closeSheets); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeSheets(); });
+
+  var ideas = {
+    'LKOH': { title:'Купить LKOH до 8%', rows:[['Действие','Купить'],['Доля сейчас → после','5% → 8%'],['Почему','4 из 6 источников'],['Лимит профиля','≤ 10% ✓'],['Ориентир суммы','[сумма] ₽']] },
+    'SBER': { title:'Сократить SBER до 10%', rows:[['Действие','Продать часть'],['Доля сейчас → после','12% → 10%'],['Почему','Лимит профиля'],['Мнения источников','3 за · 2 против'],['Ориентир суммы','[сумма] ₽']] },
+    'ОФЗ': { title:'Добавить длинные ОФЗ', rows:[['Действие','Купить'],['Доля сейчас → после','0% → 10%'],['Почему','5 из 7 ждут снижения ставки'],['Лимит профиля','✓'],['Ориентир суммы','[сумма] ₽']] }
+  };
+  $$('[data-idea]').forEach(function(b){ b.addEventListener('click', function(){
+    var d = ideas[b.dataset.idea]; $('#ideaTitle').textContent = d.title;
+    var body = $('#ideaBody'); body.innerHTML = '';
+    d.rows.forEach(function(r){ var k = document.createElement('div'); k.className = 'kv';
+      var a = document.createElement('span'); a.textContent = r[0]; var v = document.createElement('b'); v.textContent = r[1];
+      k.appendChild(a); k.appendChild(v); body.appendChild(k); });
+    openSheet('#ideaSheet');
+  }); });
+  $('#confirmIdea').addEventListener('click', function(){ closeSheets(); toast('Заявка подготовлена — подтвердите её, чтобы отправить'); });
+
+  // chat
+  var replies = {
+    'что изменилось за неделю?': 'Индекс вырос на 1,2%, ваш портфель — на 1,5%. Главные темы в ваших источниках: ставка, дивиденды SBER и отчётность YDEX. Подробнее — во вкладке «Сводка». (демо)',
+    'сделай пост по итогам': 'Готово: черновик поста на 600 знаков по итогам недели со ссылками на 4 источника. Скопировать для Пульса? (демо)'
+  };
+  function addMsg(text, who){ var d = document.createElement('div'); d.className = 'msg ' + who; d.textContent = text; $('#msgs').appendChild(d); var sc = $('#s-chat'); sc.scrollTop = sc.scrollHeight; }
+  function ask(q){ if (!q.trim()) return; addMsg(q, 'me');
+    setTimeout(function(){ addMsg(replies[q.trim().toLowerCase()] || 'В демо-версии ответы ограничены. В продукте ассистент ответит по вашим источникам и даст ссылку на каждое утверждение.', 'ai'); }, 600); }
+  $('#composer').addEventListener('submit', function(e){ e.preventDefault(); var i = $('#ask'); ask(i.value); i.value = ''; });
+  $$('#suggest .chip').forEach(function(c){ c.addEventListener('click', function(){ ask(c.textContent); }); });
+})();
+</script>
+</body>
+</html>
